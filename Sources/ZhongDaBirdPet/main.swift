@@ -250,6 +250,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var alwaysOnTop = true
     private var lastRuleKey: String?
     private var ruleTimer: Timer?
+    private var lastRandomSwitchAt = Date.distantPast
 
     private func bundledAssetDirectory() -> URL {
         if let resourceURL = Bundle.main.resourceURL {
@@ -267,7 +268,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         rescanAssets()
         rebuildMenu()
 
-        ruleTimer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
+        ruleTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.applyAutomaticRule()
             }
@@ -457,8 +458,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else if (11 * 60 + 30...12 * 60 + 30).contains(minutesAfterMidnight)
             || (17 * 60...18 * 60).contains(minutesAfterMidnight) {
             showFixedMood(ruleKey: "hungry", preferredNames: ["饿了"], forceRefresh: forceRefresh)
-        } else if let asset = randomAsset() {
+        } else if forceRefresh || now.timeIntervalSince(lastRandomSwitchAt) >= 120, let asset = randomAsset() {
             lastRuleKey = "random"
+            lastRandomSwitchAt = now
             petWindow.show(asset: asset)
             rebuildMenu()
         }

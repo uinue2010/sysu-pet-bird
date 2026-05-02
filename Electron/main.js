@@ -4,6 +4,7 @@ const path = require('path');
 const { pathToFileURL } = require('url');
 
 const WINDOW_SIDE = 96;
+const RULE_CHECK_INTERVAL_MS = 15 * 1000;
 const RANDOM_INTERVAL_MS = 2 * 60 * 1000;
 const ASSET_EXTENSIONS = new Set(['.gif', '.png', '.jpg', '.jpeg', '.webp', '']);
 const SPECIAL_RANDOM_NAMES = ['饿了', '晚安'];
@@ -13,6 +14,7 @@ let tray;
 let assets = [];
 let autoSwitchEnabled = true;
 let lastFixedRule = null;
+let lastRandomSwitchAt = 0;
 
 function assetDirectory() {
   if (app.isPackaged) {
@@ -213,7 +215,10 @@ function applyAutomaticRule(forceRefresh = false) {
   } else if ((minutes >= 11 * 60 + 30 && minutes <= 12 * 60 + 30) || (minutes >= 17 * 60 && minutes <= 18 * 60)) {
     showFixedMood('hungry', ['饿了'], forceRefresh);
   } else {
+    const now = Date.now();
+    if (!forceRefresh && now - lastRandomSwitchAt < RANDOM_INTERVAL_MS) return;
     lastFixedRule = 'random';
+    lastRandomSwitchAt = now;
     showAsset(randomAsset());
   }
 }
@@ -224,7 +229,7 @@ ipcMain.handle('open-context-menu', () => {
 
 app.whenReady().then(() => {
   createWindow();
-  setInterval(() => applyAutomaticRule(false), RANDOM_INTERVAL_MS);
+  setInterval(() => applyAutomaticRule(false), RULE_CHECK_INTERVAL_MS);
 });
 
 app.on('window-all-closed', (event) => {
