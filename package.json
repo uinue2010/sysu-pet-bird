@@ -1,0 +1,41 @@
+{
+  "name": "sysu-pet-bird",
+  "version": "0.1.0",
+  "description": "Cross-platform desktop pet with ZhongDaBird emoji assets.",
+  "author": "uinue2010",
+  "main": "Electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac zip",
+    "dist:win": "electron-builder --win nsis portable"
+  },
+  "build": {
+    "appId": "local.sysu.petbird",
+    "productName": "中大鸟桌宠",
+    "files": [
+      "Electron/**/*",
+      "Assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "Assets/ZhongDaBird",
+        "to": "Assets/ZhongDaBird"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  }
+}

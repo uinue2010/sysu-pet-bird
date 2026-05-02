@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中大鸟桌宠</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-app-region: drag;
+    }
+
+    #pet {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      display: block;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <img id="pet" alt="中大鸟桌宠">
+  <script>
+    const pet = document.getElementById('pet');
+
+    window.petBird.onShowAsset((asset) => {
+      pet.src = asset.url;
+      pet.alt = asset.displayName;
+    });
+
+    window.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      window.petBird.openContextMenu();
+    });
+  </script>
+</body>
+</html>
