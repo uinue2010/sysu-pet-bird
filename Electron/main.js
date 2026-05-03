@@ -15,6 +15,7 @@ let assets = [];
 let autoSwitchEnabled = true;
 let lastFixedRule = null;
 let lastRandomSwitchAt = 0;
+let randomQueue = [];
 
 function assetDirectory() {
   if (app.isPackaged) {
@@ -157,6 +158,7 @@ function refreshMenus() {
 
 function rescanAssets() {
   assets = scanAssets();
+  randomQueue = [];
   if (!tray) createTray();
   refreshMenus();
 }
@@ -168,6 +170,7 @@ function currentAssetName() {
 function showAsset(asset) {
   if (!asset || !mainWindow) return;
   mainWindow.currentAsset = asset;
+  randomQueue = randomQueue.filter((queuedAsset) => queuedAsset.filePath !== asset.filePath);
   mainWindow.webContents.send('show-asset', asset);
   refreshMenus();
 }
@@ -195,9 +198,27 @@ function randomAsset() {
   const currentPath = mainWindow?.currentAsset?.filePath;
   const candidates = assets.filter((asset) => !SPECIAL_RANDOM_NAMES.some((name) => asset.displayName.includes(name)));
   const pool = candidates.length ? candidates : assets;
-  const alternatives = pool.filter((asset) => asset.filePath !== currentPath);
-  const finalPool = alternatives.length ? alternatives : pool;
-  return finalPool[Math.floor(Math.random() * finalPool.length)];
+  const poolPaths = new Set(pool.map((asset) => asset.filePath));
+  randomQueue = randomQueue.filter((asset) => poolPaths.has(asset.filePath));
+
+  if (randomQueue.length === 0) {
+    randomQueue = shuffle(pool);
+  }
+
+  if (randomQueue[0]?.filePath === currentPath && randomQueue.length > 1) {
+    randomQueue.push(randomQueue.shift());
+  }
+
+  return randomQueue.shift();
+}
+
+function shuffle(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
 function showFixedMood(ruleKey, names, forceRefresh) {

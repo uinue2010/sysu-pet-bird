@@ -251,6 +251,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastRuleKey: String?
     private var ruleTimer: Timer?
     private var lastRandomSwitchAt = Date.distantPast
+    private var randomQueue: [PetAsset] = []
 
     private func bundledAssetDirectory() -> URL {
         if let resourceURL = Bundle.main.resourceURL {
@@ -293,6 +294,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func rescanAssets() {
         assets = scanner.scan()
+        randomQueue.removeAll()
         if let current = petWindow.currentAsset,
            assets.contains(where: { $0.displayURL == current.displayURL }) {
             return
@@ -407,6 +409,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         lastRuleKey = nil
+        randomQueue.removeAll { $0.displayURL == asset.displayURL }
         petWindow.show(asset: asset)
         rebuildMenu()
     }
@@ -486,8 +489,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard !pool.isEmpty else { return nil }
 
         let currentURL = petWindow.currentAsset?.displayURL
-        let alternativePool = pool.filter { $0.displayURL != currentURL }
-        return (alternativePool.isEmpty ? pool : alternativePool).randomElement()
+        let poolURLs = Set(pool.map(\.displayURL))
+        randomQueue.removeAll { !poolURLs.contains($0.displayURL) }
+
+        if randomQueue.isEmpty {
+            randomQueue = pool.shuffled()
+        }
+
+        if randomQueue.first?.displayURL == currentURL, randomQueue.count > 1 {
+            randomQueue.append(randomQueue.removeFirst())
+        }
+
+        return randomQueue.removeFirst()
     }
 
     private func pickAsset(preferredNames: [String]) -> PetAsset? {
