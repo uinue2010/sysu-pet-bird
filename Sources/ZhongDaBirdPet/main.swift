@@ -456,7 +456,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let minute = calendar.component(.minute, from: now)
         let minutesAfterMidnight = hour * 60 + minute
 
-        if minutesAfterMidnight >= 21 * 60 + 30 {
+        if minutesAfterMidnight >= 21 * 60 + 30 || minutesAfterMidnight <= 7 * 60 + 30 {
             showFixedMood(ruleKey: "night", preferredNames: ["晚安"], forceRefresh: forceRefresh)
         } else if (11 * 60 + 30...12 * 60 + 30).contains(minutesAfterMidnight)
             || (17 * 60...18 * 60).contains(minutesAfterMidnight) {

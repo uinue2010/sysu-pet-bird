@@ -231,7 +231,7 @@ function applyAutomaticRule(forceRefresh = false) {
   if (!autoSwitchEnabled || assets.length === 0) return;
 
   const minutes = minutesAfterMidnight(new Date());
-  if (minutes >= 21 * 60 + 30) {
+  if (minutes >= 21 * 60 + 30 || minutes <= 7 * 60 + 30) {
     showFixedMood('night', ['晚安'], forceRefresh);
   } else if ((minutes >= 11 * 60 + 30 && minutes <= 12 * 60 + 30) || (minutes >= 17 * 60 && minutes <= 18 * 60)) {
     showFixedMood('hungry', ['饿了'], forceRefresh);
